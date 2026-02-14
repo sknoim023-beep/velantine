@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doraemon Valentine Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --doraemon-blue: #00a0e9;
+      --doraemon-dark: #0088c7;
+      --valentine-pink: #ff6b9d;
+      --valentine-red: #e84363;
+      --white: #fff;
+      --door-frame: #8b4513;
+      --door-pink: #ff85a2;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 40%, #1a0a2e 100%);
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .card-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      min-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Tap hint */
+    .tap-hint {
+      position: absolute;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+      animation: pulse 1.5s ease-in-out infinite;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Tap hint & name section are in body, not in card-wrapper */
+    body.card-opened .tap-hint {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    body.card-opened .name-section {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Door + frame */
+    .door-scene {
+      position: relative;
+      width: 280px;
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .door-frame {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #6b3410 0%, #8b4513 50%, #5c2e0d 100%);
+      border-radius: 12px;
+      box-shadow:
+        inset 0 0 0 8px rgba(0,0,0,0.3),
+        inset 0 0 30px rgba(0,0,0,0.4),
+        0 20px 40px rgba(0,0,0,0.5);
+      padding: 14px;
+      z-index: 2;
+    }
+
+    .door {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .door:active {
+      transform: scale(0.98);
+    }
+
+    .door-knob {
+      position: absolute;
+      z-index: 2;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .door-text {
+      position: relative;
+      z-index: 2;
+      color: rgba(255,255,255,0.95);
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 0 2rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* Door open state: door panels slide aside */
+    .card-opened .door-scene {
+      pointer-events: none;
+    }
+
+    .card-opened .door {
+      cursor: default;
+    }
+
+    .card-opened .door .door-panel {
+      transform: translateX(-100%);
+    }
+
+    .card-opened .door .door-panel.right {
+      transform: translateX(100%);
+    }
+
+    .card-opened .door .door-text,
+    .card-opened .door .door-knob {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .door-panel {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(160deg, var(--door-pink) 0%, var(--valentine-red) 100%);
+      border-radius: 8px 0 0 8px;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: inset 0 0 15px rgba(255,255,255,0.15), 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .door-panel.right {
+      left: 50%;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .door-panel .door-text,
+    .door-panel .door-knob {
+      display: none;
+    }
+
+    /* Reveal area (behind door) */
+    .reveal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 240px;
+      min-height: 320px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s ease 0.3s, visibility 0s linear 0.9s;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .card-opened .reveal {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.6s ease 0.4s, visibility 0s linear 0s;
+    }
+
+    /* Doraemon character (simplified SVG-style with divs) */
+    .doraemon {
+      position: relative;
+      width: 120px;
+      height: 130px;
+      flex-shrink: 0;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .doraemon-head {
+      width: 100px;
+      height: 100px;
+      background: var(--doraemon-blue);
+      border-radius: 50%;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      box-shadow:
+        inset -8px -8px 20px rgba(0,0,0,0.15),
+        inset 8px 8px 20px rgba(255,255,255,0.25),
+        0 6px 20px rgba(0,0,0,0.3);
+      border: 4px solid var(--doraemon-dark);
+    }
+
+    .doraemon-face {
+      position: absolute;
+      width: 72px;
+      height: 72px;
+      background: var(--white);
+      border-radius: 50%;
+      left: 50%;
+      top: 18px;
+      transform: translateX(-50%);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .doraemon-nose {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #e84363;
+      border-radius: 50%;
+      left: 50%;
+      top: 28px;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .doraemon-mouth {
+      position: absolute;
+      width: 4px;
+      height: 20px;
+      background: #333;
+      left: 50%;
+      top: 46px;
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+
+    .doraemon-whiskers {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      width: 50px;
+      height: 2px;
+      margin-left: -25px;
+    }
+
+    .doraemon-whiskers::before,
+    .doraemon-whiskers::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 2px;
+      background: #333;
+      border-radius: 1px;
+      top: 0;
+    }
+
+    .doraemon-whiskers::before {
+      left: -8px;
+      transform: rotate(-15deg);
+      transform-origin: right center;
+    }
+
+    .doraemon-whiskers::after {
+      right: -8px;
+      transform: rotate(15deg);
+      transform-origin: left center;
+    }
+
+    .doraemon-bell {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      background: #ffc107;
+      border-radius: 50%;
+      left: 50%;
+      top: 82px;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.4);
+      border: 3px solid #daa520;
+      animation: bellShake 2s ease-in-out infinite;
+    }
+
+    .doraemon-bell::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 10px;
+      background: #b8860b;
+      border-radius: 2px;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%);
+    }
+
+    @keyframes bellShake {
+      0%, 90%, 100% { transform: translateX(-50%) rotate(0deg); }
+      92% { transform: translateX(-50%) rotate(-8deg); }
+      96% { transform: translateX(-50%) rotate(8deg); }
+    }
+
+    .doraemon-body {
+      position: absolute;
+      width: 90px;
+      height: 35px;
+      background: var(--white);
+      left: 50%;
+      top: 88px;
+      transform: translateX(-50%);
+      border-radius: 0 0 45px 45px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      border: 3px solid var(--doraemon-dark);
+      border-top: none;
+    }
+
+    .doraemon-pocket {
+      position: absolute;
+      width: 70px;
+      height: 22px;
+      background: var(--white);
+      border: 3px solid var(--doraemon-dark);
+      border-radius: 0 0 35px 35px;
+      left: 50%;
+      top: 95px;
+      transform: translateX(-50%);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.06);
+    }
+
+    /* Hearts floating in reveal */
+    .hearts-reveal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .heart-float {
+      position: absolute;
+      bottom: 0;
+      font-size: 1.2rem;
+      opacity: 0.8;
+      animation: heartRise 4s ease-in infinite;
+    }
+
+    .heart-float:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .heart-float:nth-child(2) { left: 25%; animation-delay: 0.5s; }
+    .heart-float:nth-child(3) { left: 45%; animation-delay: 1s; }
+    .heart-float:nth-child(4) { left: 65%; animation-delay: 1.5s; }
+    .heart-float:nth-child(5) { left: 85%; animation-delay: 2s; }
+    .heart-float:nth-child(6) { left: 15%; animation-delay: 2.5s; }
+    .heart-float:nth-child(7) { left: 55%; animation-delay: 3s; }
+    .heart-float:nth-child(8) { left: 75%; animation-delay: 3.5s; }
+
+    @keyframes heartRise {
+      0% {
+        transform: translateY(100%) scale(0.6);
+        opacity: 0;
+      }
+      15% { opacity: 0.8; }
+      85% { opacity: 0.6; }
+      100% {
+        transform: translateY(-120%) scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* Message area */
+    .message-box {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      max-width: 260px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      text-align: center;
+      animation: messageIn 0.6s ease 0.5s both;
+    }
+
+    @keyframes messageIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .message-box h2 {
+      color: var(--valentine-red);
+      font-size: 1.25rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .message-box .personalized {
+      color: #333;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    #personalizedMessage {
+      display: none;
+    }
+
+    #personalizedMessage:not(:empty) {
+      display: block;
+    }
+
+    .message-box p {
+      color: #555;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    /* Name input (before open) */
+    .name-section {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      text-align: center;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .name-section label {
+      display: block;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .name-section input {
+      width: 100%;
+      padding: 0.6rem 1rem;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.15);
+      color: var(--white);
+      font-size: 1rem;
+      font-family: inherit;
+      text-align: center;
+    }
+
+    .name-section input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .name-section input:focus {
+      outline: none;
+      border-color: var(--valentine-pink);
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Confetti container */
+    #confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      animation: confettiFall 3s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* Mute button */
+    .mute-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      color: var(--white);
+      cursor: pointer;
+      font-size: 1.2rem;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .mute-btn:hover {
+      background: rgba(255,255,255,0.35);
+    }
+
+    .mute-btn.muted {
+      opacity: 0.7;
+    }
+
+    @media (max-height: 600px) {
+      .card-wrapper { min-height: 95vh; }
+      .door-scene { height: 280px; }
+      .name-section { bottom: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <p class="tap-hint">Tap the door to open your surprise 💕</p>
+
+  <div class="card-wrapper" id="cardWrapper">
+    <div class="door-scene">
+      <div class="door-frame">
+        <div class="door" id="door" role="button" tabindex="0" aria-label="Open the door">
+          <div class="door-panel"></div>
+          <div class="door-panel right"></div>
+          <span class="door-text">Open the door to my heart</span>
+          <span class="door-knob"></span>
+        </div>
+      </div>
+
+      <div class="reveal" id="reveal">
+        <div class="hearts-reveal">
+          <span class="heart-float">❤️</span>
+          <span class="heart-float">💕</span>
+          <span class="heart-float">❤️</span>
+          <span class="heart-float">💗</span>
+          <span class="heart-float">❤️</span>
+          <span class="heart-float">💕</span>
+          <span class="heart-float">💗</span>
+          <span class="heart-float">❤️</span>
+        </div>
+        <div class="doraemon">
+          <div class="doraemon-head"></div>
+          <div class="doraemon-face"></div>
+          <div class="doraemon-nose"></div>
+          <div class="doraemon-mouth"></div>
+          <div class="doraemon-whiskers"></div>
+          <div class="doraemon-bell"></div>
+          <div class="doraemon-body"></div>
+          <div class="doraemon-pocket"></div>
+        </div>
+        <div class="message-box">
+          <h2>Will you be my Valentine?</h2>
+          <p class="personalized" id="personalizedMessage"></p>
+          <p>With you, every day is a new adventure. You're my favorite story! 💙</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="name-section">
+    <label for="valentineName">Your Valentine's name (optional)</label>
+    <input type="text" id="valentineName" placeholder="Type their name..." maxlength="30" />
+  </div>
+
+  <button type="button" class="mute-btn" id="muteBtn" aria-label="Toggle sound">
+    <span id="muteIcon">🔊</span>
+  </button>
+
+  <div id="confetti-container"></div>
+
+  <script>
+    (function () {
+      const door = document.getElementById('door');
+      const cardWrapper = document.getElementById('cardWrapper');
+      const reveal = document.getElementById('reveal');
+      const valentineName = document.getElementById('valentineName');
+      const personalizedMessage = document.getElementById('personalizedMessage');
+      const confettiContainer = document.getElementById('confetti-container');
+      const muteBtn = document.getElementById('muteBtn');
+      const muteIcon = document.getElementById('muteIcon');
+
+      let opened = false;
+      let muted = false;
+
+      // Simple beep using Web Audio (no external file); respects autoplay policy
+      function playDing() {
+        if (muted) return;
+        try {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return;
+          const ctx = new Ctx();
+          if (ctx.state === 'suspended') {
+            ctx.resume().catch(function () {});
+          }
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 880;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.2);
+        } catch (err) {
+          // Audio not supported or blocked
+        }
+      }
+
+      function openCard() {
+        if (opened) return;
+        opened = true;
+        cardWrapper.classList.add('card-opened');
+        document.body.classList.add('card-opened');
+        playDing();
+        confettiBurst();
+
+        const name = (valentineName.value || '').trim();
+        if (name) {
+          personalizedMessage.textContent = 'To ' + name + ',';
+          personalizedMessage.style.display = 'block';
+        } else {
+          personalizedMessage.style.display = 'none';
+        }
+      }
+
+      function confettiBurst() {
+        if (!confettiContainer) return;
+        const colors = ['#ff6b9d', '#e84363', '#00a0e9', '#ffc107', '#fff', '#ff85a2'];
+        const count = 45;
+        const duration = 4000;
+        for (let i = 0; i < count; i++) {
+          const el = document.createElement('div');
+          el.className = 'confetti';
+          el.setAttribute('aria-hidden', 'true');
+          el.style.left = Math.random() * 100 + '%';
+          el.style.top = '0';
+          el.style.background = colors[Math.floor(Math.random() * colors.length)];
+          el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+          el.style.animationDelay = Math.random() * 0.5 + 's';
+          el.style.animationDuration = (2 + Math.random() * 2) + 's';
+          confettiContainer.appendChild(el);
+          setTimeout(function () {
+            if (el.parentNode) el.remove();
+          }, duration);
+        }
+      }
+
+      if (door) {
+        door.addEventListener('click', openCard);
+        door.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openCard();
+          }
+        });
+      }
+
+      if (muteBtn && muteIcon) {
+        muteBtn.addEventListener('click', function () {
+          muted = !muted;
+          muteBtn.classList.toggle('muted', muted);
+          muteIcon.textContent = muted ? '🔇' : '🔊';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
